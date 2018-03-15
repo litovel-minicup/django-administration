@@ -6,14 +6,13 @@
 #   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
-from __future__ import unicode_literals
 
 from django.db import models
 from django.utils.translation import ugettext as _
 
 
 class Category(models.Model):
-    year = models.ForeignKey('Year', models.DO_NOTHING, blank=True, null=True)
+    year = models.ForeignKey('Year', models.PROTECT, blank=True, null=True)
     name = models.CharField(max_length=30)
     slug = models.CharField(max_length=30)
     default = models.IntegerField()
@@ -29,7 +28,7 @@ class Category(models.Model):
 
 class Day(models.Model):
     day = models.DateField()
-    year = models.ForeignKey('Year', models.DO_NOTHING)
+    year = models.ForeignKey('Year', models.PROTECT)
 
     def __str__(self):
         return _('{}. {}. {}').format(self.day.day, self.day.month, self.year)
@@ -48,14 +47,17 @@ class DbMigrations(models.Model):
 
 
 class Match(models.Model):
-    match_term = models.ForeignKey('MatchTerm', models.CASCADE, blank=True, null=True)
-    category = models.ForeignKey(Category, models.DO_NOTHING)
-    home_team_info = models.ForeignKey('TeamInfo', models.CASCADE, related_name='match_home_team_info')
-    away_team_info = models.ForeignKey('TeamInfo', models.CASCADE, related_name='match_away_team_info')
+    match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True)
+    category = models.ForeignKey(Category, models.PROTECT)
+    home_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_home_team_info')
+    away_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_away_team_info')
     score_home = models.IntegerField(blank=True, null=True)
     score_away = models.IntegerField(blank=True, null=True)
     confirmed = models.DateTimeField(blank=True, null=True)
     confirmed_as = models.IntegerField(blank=True, null=True)
+
+    first_half_start = models.DateTimeField(blank=True, null=True)
+    second_half_start = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return _('{} vs. {}').format(self.home_team_info, self.away_team_info)
@@ -67,10 +69,25 @@ class Match(models.Model):
         ordering = ('match_term__day__day', 'match_term__start')
 
 
+class MatchEvent(models.Model):
+    match = models.ForeignKey(Match, models.PROTECT)
+    score_home = models.IntegerField(blank=True, null=True)
+    score_away = models.IntegerField(blank=True, null=True)
+    message = models.TextField(blank=True, null=True)
+    type = models.CharField(max_length=16, blank=True, null=True)
+    half_index = models.IntegerField()
+    time_offset = models.IntegerField()
+    player = models.ForeignKey('Player', models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'match_event'
+
+
 class MatchTerm(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField()
-    day = models.ForeignKey(Day, models.DO_NOTHING)
+    day = models.ForeignKey(Day, models.PROTECT)
     location = models.CharField(max_length=50)
 
     def __str__(self):
@@ -87,26 +104,13 @@ class News(models.Model):
     content = models.TextField()
     updated = models.DateTimeField()
     added = models.DateTimeField()
-    year = models.ForeignKey('Year', models.DO_NOTHING, blank=True, null=True)
+    year = models.ForeignKey('Year', models.PROTECT, blank=True, null=True)
     texy = models.IntegerField()
-    tag = models.ForeignKey('Tag', models.DO_NOTHING, blank=True, null=True)
+    tag = models.ForeignKey('Tag', models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'news'
-
-
-class OnlineReport(models.Model):
-    match = models.ForeignKey(Match, models.DO_NOTHING)
-    message = models.TextField()
-    type = models.CharField(max_length=20)
-    updated = models.DateTimeField()
-    added = models.DateTimeField()
-    author = models.ForeignKey('User', models.DO_NOTHING, db_column='author')
-
-    class Meta:
-        managed = False
-        db_table = 'online_report'
 
 
 class Photo(models.Model):
@@ -114,7 +118,7 @@ class Photo(models.Model):
     added = models.DateTimeField()
     taken = models.DateTimeField()
     active = models.IntegerField()
-    year = models.ForeignKey('Year', models.DO_NOTHING, blank=True, null=True)
+    year = models.ForeignKey('Year', models.PROTECT, blank=True, null=True)
     author = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -123,8 +127,8 @@ class Photo(models.Model):
 
 
 class PhotoTag(models.Model):
-    photo = models.ForeignKey(Photo, models.DO_NOTHING, primary_key=True)
-    tag = models.ForeignKey('Tag', models.DO_NOTHING)
+    photo = models.ForeignKey(Photo, models.PROTECT, primary_key=True)
+    tag = models.ForeignKey('Tag', models.PROTECT)
 
     class Meta:
         managed = False
@@ -132,11 +136,23 @@ class PhotoTag(models.Model):
         unique_together = (('photo', 'tag'),)
 
 
+class Player(models.Model):
+    name = models.CharField(max_length=50)
+    surname = models.CharField(max_length=50)
+    number = models.IntegerField()
+    secondary_number = models.IntegerField(blank=True, null=True)
+    team_info = models.ForeignKey('TeamInfo', models.PROTECT)
+
+    class Meta:
+        managed = False
+        db_table = 'player'
+
+
 class StaticContent(models.Model):
     slug = models.CharField(max_length=50)
     content = models.TextField()
     updated = models.DateTimeField(blank=True, null=True)
-    year = models.ForeignKey('Year', models.DO_NOTHING, blank=True, null=True)
+    year = models.ForeignKey('Year', models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -147,8 +163,8 @@ class Tag(models.Model):
     name = models.CharField(max_length=50, blank=True, null=True)
     slug = models.CharField(max_length=50)
     is_main = models.IntegerField()
-    main_photo = models.ForeignKey(Photo, models.DO_NOTHING, blank=True, null=True)
-    year = models.ForeignKey('Year', models.DO_NOTHING, blank=True, null=True)
+    main_photo = models.ForeignKey(Photo, models.PROTECT, blank=True, null=True)
+    year = models.ForeignKey('Year', models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -160,15 +176,15 @@ class Tag(models.Model):
 
 
 class Team(models.Model):
-    category = models.ForeignKey(Category, models.DO_NOTHING)
-    team_info = models.ForeignKey('TeamInfo', models.CASCADE)
+    category = models.ForeignKey(Category, models.PROTECT)
+    team_info = models.ForeignKey('TeamInfo', models.PROTECT)
     order = models.IntegerField()
     points = models.IntegerField()
     scored = models.IntegerField()
     received = models.IntegerField()
     inserted = models.DateTimeField()
     actual = models.IntegerField()
-    after_match = models.ForeignKey(Match, models.DO_NOTHING, blank=True, null=True)
+    after_match = models.ForeignKey(Match, models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return _('Team record for {}').format(self.team_info)
@@ -179,11 +195,19 @@ class Team(models.Model):
 
 
 class TeamInfo(models.Model):
-    category = models.ForeignKey(Category, models.DO_NOTHING)
+    category = models.ForeignKey(Category, models.PROTECT)
     name = models.CharField(max_length=30)
     slug = models.CharField(max_length=30)
-    static_content = models.ForeignKey(StaticContent, models.DO_NOTHING, blank=True, null=True)
-    tag = models.ForeignKey(Tag, models.DO_NOTHING, blank=True, null=True)
+    static_content = models.ForeignKey(StaticContent, models.PROTECT, blank=True, null=True)
+    tag = models.ForeignKey(Tag, models.PROTECT, blank=True, null=True)
+
+    dress_color = models.CharField(max_length=6, blank=True, null=True)
+    dress_color_secondary = models.CharField(max_length=6)
+    trainer_name = models.CharField(max_length=50, blank=True, null=True)
+    description = models.TextField()
+    password = models.TextField(blank=True, null=True)
+    updated = models.DateTimeField(blank=True, null=True)
+    auth_token = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name

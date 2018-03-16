@@ -18,7 +18,7 @@ class Category(models.Model):
     default = models.IntegerField()
 
     def __str__(self):
-        return _('{}').format(self.name)
+        return '{}'.format(self.name or self.slug)
 
     class Meta:
         managed = False
@@ -70,7 +70,7 @@ class Match(models.Model):
 
 
 class MatchEvent(models.Model):
-    match = models.ForeignKey(Match, models.PROTECT)
+    match = models.ForeignKey(Match, models.PROTECT, related_name='match_match_event')
     score_home = models.IntegerField(blank=True, null=True)
     score_away = models.IntegerField(blank=True, null=True)
     message = models.TextField(blank=True, null=True)

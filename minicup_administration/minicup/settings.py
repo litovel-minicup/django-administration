@@ -1,5 +1,5 @@
 # noinspection PyUnresolvedReferences
-from minicup.settings_default import *
+from minicup_administration.minicup.settings_default import *
 
 DATABASES = {
     'minicup': {

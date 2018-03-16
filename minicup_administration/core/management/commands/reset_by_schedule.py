@@ -4,7 +4,7 @@ from pprint import pprint
 
 from django.core.management.base import BaseCommand
 
-from core.models import MatchTerm, TeamInfo, Match, Category
+from minicup_administration.core.models import MatchTerm, TeamInfo, Match, Category
 
 
 class Command(BaseCommand):

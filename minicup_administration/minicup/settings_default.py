@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'core'
+    'minicup_administration.core'
 ]
 
 MIDDLEWARE = [

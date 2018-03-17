@@ -24,6 +24,7 @@ class Category(models.Model):
         managed = False
         db_table = 'category'
         unique_together = (('year', 'slug'),)
+        ordering = ['year', 'slug']
 
 
 class Day(models.Model):
@@ -141,11 +142,12 @@ class Player(models.Model):
     surname = models.CharField(max_length=50)
     number = models.IntegerField()
     secondary_number = models.IntegerField(blank=True, null=True)
-    team_info = models.ForeignKey('TeamInfo', models.PROTECT)
+    team_info = models.ForeignKey('TeamInfo', models.PROTECT , related_name='team_info_player')
 
     class Meta:
         managed = False
         db_table = 'player'
+        ordering = ['secondary_number', 'number']
 
 
 class StaticContent(models.Model):

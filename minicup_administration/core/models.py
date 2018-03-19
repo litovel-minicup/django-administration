@@ -48,6 +48,20 @@ class DbMigrations(models.Model):
 
 
 class Match(models.Model):
+    STATE_INIT = 'init'
+    STATE_HALF_FIRST = 'half_first'
+    STATE_HALF_PAUSE = 'pause'
+    STATE_HALF_SECOND = 'half_second'
+    STATE_END = 'end'
+
+    STATES = {
+        STATE_INIT: STATE_INIT,
+        STATE_HALF_FIRST: STATE_HALF_FIRST,
+        STATE_HALF_PAUSE: STATE_HALF_PAUSE,
+        STATE_HALF_SECOND: STATE_HALF_SECOND,
+        STATE_END: STATE_END
+    }
+
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True)
     category = models.ForeignKey(Category, models.PROTECT)
     home_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_home_team_info')
@@ -56,6 +70,7 @@ class Match(models.Model):
     score_away = models.IntegerField(blank=True, null=True)
     confirmed = models.DateTimeField(blank=True, null=True)
     confirmed_as = models.IntegerField(blank=True, null=True)
+    online_state = models.CharField(max_length=255, choices=STATES.items())
 
     first_half_start = models.DateTimeField(blank=True, null=True)
     second_half_start = models.DateTimeField(blank=True, null=True)
@@ -74,9 +89,12 @@ class Match(models.Model):
             id=self.id,
             home_team_name=self.home_team_info.name,
             away_team_name=self.away_team_info.name,
+            home_team_color='#ff8574',
+            away_team_color='#88dd12',
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],
+            state=self.online_state or (self.STATE_END if self.confirmed else self.STATE_INIT),
             **kwargs
         )
 

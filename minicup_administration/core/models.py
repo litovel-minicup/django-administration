@@ -69,6 +69,15 @@ class Match(models.Model):
         unique_together = (('category', 'home_team_info', 'away_team_info'),)
         ordering = ('match_term__day__day', 'match_term__start')
 
+    def serialize(self, **kwargs):
+        return dict(
+            id=self.id,
+            home_team_name=self.home_team_info.name,
+            away_team_name=self.away_team_info.name,
+            score=[self.score_home, self.score_away],
+            **kwargs
+        )
+
 
 class MatchEvent(models.Model):
     match = models.ForeignKey(Match, models.PROTECT, related_name='match_match_event')
@@ -80,9 +89,26 @@ class MatchEvent(models.Model):
     time_offset = models.IntegerField()
     player = models.ForeignKey('Player', models.PROTECT, blank=True, null=True)
 
+    TYPE_START = 'start'
+    TYPE_GOAL = 'goal'
+    TYPE_END = 'end'
+    TYPE_INFO = 'info'
+
+    HALF_INDEX_FIRST = 0
+    HALF_INDEX_SECOND = 1
+
     class Meta:
         managed = False
         db_table = 'match_event'
+
+    def serialize(self):
+        return dict(
+            id=self.id,
+            timeOffset=self.time_offset,
+            halfIndex=self.half_index,
+            message=self.message,
+            type=self.type
+        )
 
 
 class MatchTerm(models.Model):
@@ -142,12 +168,15 @@ class Player(models.Model):
     surname = models.CharField(max_length=50)
     number = models.IntegerField()
     secondary_number = models.IntegerField(blank=True, null=True)
-    team_info = models.ForeignKey('TeamInfo', models.PROTECT , related_name='team_info_player')
+    team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='team_info_player')
 
     class Meta:
         managed = False
         db_table = 'player'
         ordering = ['secondary_number', 'number']
+
+    def __str__(self):
+        return '{0.name} {0.surname}'.format(self)
 
 
 class StaticContent(models.Model):

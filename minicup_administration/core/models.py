@@ -74,6 +74,8 @@ class Match(models.Model):
             id=self.id,
             home_team_name=self.home_team_info.name,
             away_team_name=self.away_team_info.name,
+            first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
+            second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],
             **kwargs
         )

@@ -127,6 +127,7 @@ class MatchEvent(models.Model):
             timeOffset=self.time_offset,
             halfIndex=self.half_index,
             message=self.message,
+            score=[self.score_home, self.score_away],
             type=self.type
         )
 

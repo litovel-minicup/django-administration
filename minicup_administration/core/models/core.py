@@ -1,4 +1,6 @@
 # coding=utf-8
+from datetime import timedelta
+from typing import Tuple
 
 from django.db import models
 from django.utils.translation import ugettext as _
@@ -57,6 +59,8 @@ class Match(models.Model):
         STATE_END: STATE_END
     }
 
+    HALF_LENGTH = timedelta(minutes=10)
+
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True)
     category = models.ForeignKey(Category, models.PROTECT)
     home_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_home_team_info')
@@ -93,6 +97,10 @@ class Match(models.Model):
             **kwargs
         )
 
+    @property
+    def teams(self) -> Tuple["TeamInfo", "TeamInfo"]:
+        return self.home_team_info, self.away_team_info
+
 
 class MatchEvent(models.Model):
     match = models.ForeignKey(Match, models.PROTECT, related_name='match_match_event')
@@ -103,6 +111,7 @@ class MatchEvent(models.Model):
     half_index = models.IntegerField()
     time_offset = models.IntegerField()
     player = models.ForeignKey('Player', models.PROTECT, blank=True, null=True)
+    team_info = models.ForeignKey('TeamInfo', models.PROTECT, blank=True, null=True)
 
     TYPE_START = 'start'
     TYPE_GOAL = 'goal'
@@ -122,9 +131,13 @@ class MatchEvent(models.Model):
             timeOffset=self.time_offset,
             halfIndex=self.half_index,
             message=self.message,
-            score=[self.score_home, self.score_away],
+            score=self.score,
             type=self.type
         )
+
+    @property
+    def score(self) -> Tuple[int, int]:
+        return self.score_home or 0, self.score_away or 0
 
 
 class MatchTerm(models.Model):

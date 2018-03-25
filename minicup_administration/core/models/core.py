@@ -139,6 +139,7 @@ class MatchEvent(models.Model):
     class Meta:
         managed = False
         db_table = 'match_event'
+        ordering = ['half_index', 'time_offset']
 
     def serialize(self):
         return dict(
@@ -154,6 +155,12 @@ class MatchEvent(models.Model):
     def score(self) -> Tuple[int, int]:
         return self.score_home or 0, self.score_away or 0
 
+    def __str__(self):
+        return '{}-{}-{}'.format(
+            self.type,
+            self.match,
+            self.player or self.team_info or '.'
+        )
 
 class MatchTerm(models.Model):
     start = models.DateTimeField()

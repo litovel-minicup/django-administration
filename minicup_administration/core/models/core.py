@@ -1,4 +1,5 @@
 # coding=utf-8
+import logging
 from datetime import timedelta
 from typing import Tuple
 
@@ -52,11 +53,11 @@ class Match(models.Model):
     STATE_END = 'end'
 
     STATES = {
-        STATE_INIT: STATE_INIT,
-        STATE_HALF_FIRST: STATE_HALF_FIRST,
-        STATE_HALF_PAUSE: STATE_HALF_PAUSE,
-        STATE_HALF_SECOND: STATE_HALF_SECOND,
-        STATE_END: STATE_END
+        STATE_INIT: (STATE_HALF_FIRST,),
+        STATE_HALF_FIRST: (STATE_HALF_PAUSE,),
+        STATE_HALF_PAUSE: (STATE_HALF_SECOND,),
+        STATE_HALF_SECOND: (STATE_END,),
+        STATE_END: ()
     }
 
     HALF_LENGTH = timedelta(minutes=10)
@@ -100,6 +101,20 @@ class Match(models.Model):
     @property
     def teams(self) -> Tuple["TeamInfo", "TeamInfo"]:
         return self.home_team_info, self.away_team_info
+
+    def change_state(self, state: str) -> bool:
+        if state not in self.STATES:
+            logging.error('Unknown state {} to set.'.format(state))
+            return False
+
+        if state not in self.STATES.get(self.online_state):
+            logging.error('Cannot go from {} to {}.'.format(self.online_state, state))
+            return False
+
+        logging.info('Changing match state from {} to {}.'.format(self.online_state, state))
+        self.online_state = state
+        self.save(update_fields=('online_state',))
+        return True
 
 
 class MatchEvent(models.Model):

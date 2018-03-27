@@ -60,6 +60,8 @@ class Match(models.Model):
         STATE_END: ()
     }
 
+    DEFAULT_STATES = (STATE_INIT, STATE_END)  # by by bool(match.confirmed)
+
     HALF_LENGTH = timedelta(minutes=10)
 
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True)
@@ -107,7 +109,7 @@ class Match(models.Model):
             logging.error('Unknown state {} to set.'.format(state))
             return False
 
-        if state not in self.STATES.get(self.online_state):
+        if state not in self.STATES.get(self.online_state, self.DEFAULT_STATES[bool(self.confirmed)]):
             logging.error('Cannot go from {} to {}.'.format(self.online_state, state))
             return False
 
@@ -161,6 +163,7 @@ class MatchEvent(models.Model):
             self.match,
             self.player or self.team_info or '.'
         )
+
 
 class MatchTerm(models.Model):
     start = models.DateTimeField()

@@ -2,9 +2,9 @@
 # coding=utf-8
 import os
 import sys
-from os.path import dirname
+from os.path import dirname, join, abspath
 
-sys.path.insert(1, dirname(__file__))
+sys.path.insert(1, abspath(join(dirname(__file__), '..')))
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "minicup.settings")

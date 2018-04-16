@@ -1,10 +1,10 @@
 # noinspection PyUnresolvedReferences
-from minicup_administration.minicup.settings_default import *
+from .settings_default import *
 
 DATABASES = {
     'minicup': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'minicup_production',
+        'NAME': 'minicup',
         'USER': 'app',
         'PASSWORD': 'app',
         'HOST': 'localhost',  # Or an IP Address that your DB is hosted on

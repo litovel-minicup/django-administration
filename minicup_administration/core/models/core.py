@@ -65,7 +65,7 @@ class Match(models.Model):
     HALF_LENGTH = timedelta(minutes=10)
 
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True)
-    category = models.ForeignKey(Category, models.PROTECT)
+    category = models.ForeignKey(Category, models.PROTECT, related_name='match_category')
     home_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_home_team_info')
     away_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_away_team_info')
     score_home = models.IntegerField(blank=True, null=True)
@@ -84,13 +84,15 @@ class Match(models.Model):
         managed = False
         db_table = 'match'
         unique_together = (('category', 'home_team_info', 'away_team_info'),)
-        ordering = ('match_term__day__day', 'match_term__start')
+        ordering = ('match_term__day__day', 'match_term__start', 'id')
 
     def serialize(self, **kwargs):
         return dict(
             id=self.id,
             home_team_name=self.home_team_info.name,
+            home_team_id=self.home_team_info.id,
             away_team_name=self.away_team_info.name,
+            away_team_id=self.away_team_info.id,
             home_team_color='#ff8574',
             away_team_color='#88dd12',
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
@@ -120,6 +122,7 @@ class Match(models.Model):
 
 
 class MatchEvent(models.Model):
+    # id = models.IntegerField(primary_key=True, unique=True)
     match = models.ForeignKey(Match, models.PROTECT, related_name='match_match_event')
     score_home = models.IntegerField(blank=True, null=True)
     score_away = models.IntegerField(blank=True, null=True)

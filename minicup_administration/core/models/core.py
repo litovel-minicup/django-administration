@@ -208,8 +208,8 @@ class Photo(models.Model):
 
 
 class PhotoTag(models.Model):
-    photo = models.ForeignKey(Photo, models.PROTECT, primary_key=True)
-    tag = models.ForeignKey('Tag', models.PROTECT)
+    photo = models.ForeignKey(Photo, models.PROTECT, primary_key=True, related_name='photo_tag_photo')
+    tag = models.ForeignKey('Tag', models.PROTECT, related_name='photo_tag_tag')
 
     class Meta:
         managed = False
@@ -286,7 +286,7 @@ class TeamInfo(models.Model):
     name = models.CharField(max_length=30)
     slug = models.CharField(max_length=30)
     static_content = models.ForeignKey(StaticContent, models.PROTECT, blank=True, null=True)
-    tag = models.ForeignKey(Tag, models.PROTECT, blank=True, null=True)
+    tag = models.ForeignKey(Tag, models.PROTECT, blank=True, null=True, related_name='team_info_tag')
 
     dress_color = models.CharField(max_length=6, blank=True, null=True)
     dress_color_secondary = models.CharField(max_length=6)

@@ -98,6 +98,7 @@ class Match(models.Model):
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],
+            confirmed=self.confirmed,
             state=self.online_state or (self.STATE_END if self.confirmed else self.STATE_INIT),
             **kwargs
         )

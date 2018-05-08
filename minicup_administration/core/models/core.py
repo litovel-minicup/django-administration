@@ -87,6 +87,11 @@ class Match(models.Model):
         ordering = ('match_term__day__day', 'match_term__start', 'id')
 
     def serialize(self, **kwargs):
+        def format_color(team: TeamInfo):
+            if team.dress_color_secondary:
+                return '{t.dress_color} / {t.dress_color_secondary}'.format(t=team)
+            return team.dress_color
+
         return dict(
             id=self.id,
             home_team_name=self.home_team_info.name,
@@ -95,10 +100,13 @@ class Match(models.Model):
             away_team_id=self.away_team_info.id,
             home_team_color='#ff8574',
             away_team_color='#88dd12',
+            home_team_color_name=format_color(self.home_team_info),
+            away_team_color_name=format_color(self.away_team_info),
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],
             confirmed=self.confirmed,
+            half_length=self.HALF_LENGTH.total_seconds(),
             state=self.online_state or (self.STATE_END if self.confirmed else self.STATE_INIT),
             **kwargs
         )

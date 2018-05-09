@@ -308,6 +308,11 @@ class TeamInfo(models.Model):
     updated = models.DateTimeField(blank=True, null=True)
     auth_token = models.CharField(max_length=255)
 
+    dress_color_min = models.CharField(max_length=7)
+    dress_color_max = models.CharField(max_length=7)
+    dress_color_secondary_min = models.CharField(max_length=7)
+    dress_color_secondary_max = models.CharField(max_length=7)
+
     def __str__(self):
         return self.name
 

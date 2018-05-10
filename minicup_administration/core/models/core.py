@@ -178,6 +178,8 @@ class MatchEvent(models.Model):
 
 
 class MatchTerm(models.Model):
+    STANDARD_LENGTH = timedelta(minutes=30)
+
     start = models.DateTimeField()
     end = models.DateTimeField()
     day = models.ForeignKey(Day, models.PROTECT)

@@ -102,6 +102,7 @@ class Match(models.Model):
             away_team_color='#88dd12',
             home_team_color_name=format_color(self.home_team_info),
             away_team_color_name=format_color(self.away_team_info),
+            category_name=self.category.name,
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],

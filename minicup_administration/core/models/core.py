@@ -76,6 +76,7 @@ class Match(models.Model):
 
     first_half_start = models.DateTimeField(blank=True, null=True)
     second_half_start = models.DateTimeField(blank=True, null=True)
+    facebook_video_id = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return _('{} vs. {}').format(self.home_team_info, self.away_team_info)
@@ -106,9 +107,10 @@ class Match(models.Model):
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],
-            confirmed=self.confirmed,
+            confirmed=self.confirmed.timestamp() if self.confirmed else None,
             half_length=self.HALF_LENGTH.total_seconds(),
             state=self.online_state or (self.STATE_END if self.confirmed else self.STATE_INIT),
+            facebook_video_id=self.facebook_video_id,
             **kwargs
         )
 
@@ -117,6 +119,7 @@ class Match(models.Model):
         return self.home_team_info, self.away_team_info
 
     def change_state(self, state: str) -> bool:
+        self.refresh_from_db()
         if state not in self.STATES:
             logging.error('Unknown state {} to set.'.format(state))
             return False

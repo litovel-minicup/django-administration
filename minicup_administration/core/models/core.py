@@ -1,7 +1,7 @@
 # coding=utf-8
 import logging
 from datetime import timedelta
-from typing import Tuple
+from typing import Tuple, Optional
 
 from django.db import models
 from django.utils.translation import ugettext as _
@@ -118,20 +118,42 @@ class Match(models.Model):
     def teams(self) -> Tuple["TeamInfo", "TeamInfo"]:
         return self.home_team_info, self.away_team_info
 
-    def change_state(self, state: str) -> bool:
+    def change_state(self, new_state: str) -> Optional["MatchEvent"]:
         self.refresh_from_db()
-        if state not in self.STATES:
-            logging.error('Unknown state {} to set.'.format(state))
-            return False
 
-        if state not in self.STATES.get(self.online_state, self.DEFAULT_STATES[bool(self.confirmed)]):
-            logging.error('Cannot go from {} to {}.'.format(self.online_state, state))
-            return False
+        if new_state not in self.STATES:
+            logging.error('Unknown state {} to set.'.format(new_state))
+            return
 
-        logging.info('Changing match state from {} to {}.'.format(self.online_state, state))
-        self.online_state = state
+        if new_state not in self.STATES.get(self.online_state, self.DEFAULT_STATES[bool(self.confirmed)]):
+            logging.error('Cannot go from {} to {}.'.format(self.online_state, new_state))
+            return
+
+        logging.info('Changing match state from {} to {}.'.format(self.online_state, new_state))
+        old_state = self.online_state
+        self.online_state = new_state
         self.save(update_fields=('online_state',))
-        return True
+
+        event = MatchEvent(match=self)
+        if not old_state or old_state == self.STATE_INIT:
+            event.type = MatchEvent.TYPE_START
+            event.half_index = event.time_offset = 0
+        elif old_state == self.STATE_HALF_FIRST:
+            event.type = MatchEvent.TYPE_END
+            event.half_index = 0
+            event.time_offset = Match.HALF_LENGTH.total_seconds()
+        elif old_state == self.STATE_HALF_PAUSE:
+            event.type = MatchEvent.TYPE_START
+            event.half_index = 1
+            event.time_offset = 0
+        elif old_state == self.STATE_HALF_SECOND:
+            event.type = MatchEvent.TYPE_END
+            event.half_index = 1
+            event.time_offset = Match.HALF_LENGTH.total_seconds()
+        else:
+            raise RuntimeError('Never happen: {} -> {}.'.format(old_state, new_state))
+        event.save()
+        return event
 
 
 class MatchEvent(models.Model):
@@ -160,13 +182,21 @@ class MatchEvent(models.Model):
         ordering = ['half_index', 'time_offset']
 
     def serialize(self):
+        try:
+            team_index = self.match.teams.index(self.team_info)
+        except ValueError:
+            team_index = -1
+
         return dict(
             id=self.id,
-            timeOffset=self.time_offset,
-            halfIndex=self.half_index,
+            time_offset=self.time_offset,
+            half_index=self.half_index,
             message=self.message,
             score=self.score,
-            type=self.type
+            type=self.type,
+            team_index=team_index,
+            player_name='{p.name} {p.surname}'.format(p=self.player) if self.player else None,
+            player_number=self.player.number if self.player else None
         )
 
     @property

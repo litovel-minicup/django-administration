@@ -143,6 +143,8 @@ class Match(models.Model):
         if not old_state or old_state == self.STATE_INIT:
             event.type = MatchEvent.TYPE_START
             event.half_index = event.time_offset = 0
+            self.score_away = self.score_home = 0
+            self.save(update_fields=('score_home', 'score_away',))
         elif old_state == self.STATE_HALF_FIRST:
             event.type = MatchEvent.TYPE_END
             event.half_index = 0

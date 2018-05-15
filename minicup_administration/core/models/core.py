@@ -126,10 +126,10 @@ class Match(models.Model):
             return
 
         if new_state not in self.STATES.get(self.online_state, self.DEFAULT_STATES[bool(self.confirmed)]):
-            logging.error('Cannot go from {} to {}.'.format(self.online_state, new_state))
+            # logging.error('Cannot go from {} to {}.'.format(self.online_state, new_state))
             return
 
-        logging.info('Changing match state from {} to {}.'.format(self.online_state, new_state))
+        logging.info('MATCH: Match state change from {} to {}.'.format(self.online_state, new_state))
         old_state = self.online_state
         self.online_state = new_state
         self.save(update_fields=('online_state',))

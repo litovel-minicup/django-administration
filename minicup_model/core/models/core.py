@@ -62,7 +62,7 @@ class Match(models.Model):
 
     DEFAULT_STATES = (STATE_INIT, STATE_END)  # by by bool(match.confirmed)
 
-    HALF_LENGTH = timedelta(minutes=10)
+    HALF_LENGTH = timedelta(minutes=2)
 
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True)
     category = models.ForeignKey(Category, models.PROTECT, related_name='match_category')

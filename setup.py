@@ -18,9 +18,12 @@ base_path = abspath(dirname(__file__))
 
 def setup():
     core.setup(
-        name='litovel-minicup-administration',
+        name='litovel-minicup-model',
         version='1.0.0',
-        packages=find_packages(exclude=['*.settings', ]),
+        description='Core package with Litovel MINICUP models in Django.',
+        author='Josef Kolář',
+        author_email='thejoeejoee@gmail.com',
+        packages=find_packages(),
         requires=[
             'Django',
         ],

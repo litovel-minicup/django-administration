@@ -7,7 +7,7 @@ from os.path import dirname, join, abspath
 sys.path.insert(1, abspath(join(dirname(__file__), '..')))
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "minicup.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:

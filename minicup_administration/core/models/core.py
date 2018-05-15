@@ -95,14 +95,19 @@ class Match(models.Model):
 
         return dict(
             id=self.id,
-            home_team_name=self.home_team_info.name,
+
             home_team_id=self.home_team_info.id,
-            away_team_name=self.away_team_info.name,
-            away_team_id=self.away_team_info.id,
+            home_team_name=self.home_team_info.name,
+            home_team_abbr=self.home_team_info.abbr,
             home_team_color='#ff8574',
-            away_team_color='#88dd12',
             home_team_color_name=format_color(self.home_team_info),
+
+            away_team_id=self.away_team_info.id,
+            away_team_name=self.away_team_info.name,
+            away_team_abbr=self.away_team_info.abbr,
+            away_team_color='#88dd12',
             away_team_color_name=format_color(self.away_team_info),
+
             category_name=self.category.name,
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
@@ -333,6 +338,7 @@ class TeamInfo(models.Model):
     category = models.ForeignKey(Category, models.PROTECT)
     name = models.CharField(max_length=30)
     slug = models.CharField(max_length=30)
+    abbr = models.CharField(max_length=4, null=True, blank=True)
     static_content = models.ForeignKey(StaticContent, models.PROTECT, blank=True, null=True)
     tag = models.ForeignKey(Tag, models.PROTECT, blank=True, null=True, related_name='team_info_tag')
 

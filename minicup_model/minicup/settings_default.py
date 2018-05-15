@@ -122,3 +122,5 @@ USE_TZ = False  # TODO: sorry, but legacy db using UTC ://
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SENTRY_DSN = ''

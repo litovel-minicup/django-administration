@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'minicup_administration.core'
+    'minicup_model.core'
 ]
 
 MIDDLEWARE = [
@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'minicup_administration.minicup.urls'
+ROOT_URLCONF = 'minicup_model.minicup.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'minicup_administration.minicup.wsgi.application'
+WSGI_APPLICATION = 'minicup_model.minicup.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -85,7 +85,7 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['minicup_administration.core.db_router.DatabaseRouter', ]
+DATABASE_ROUTERS = ['minicup_model.core.db_router.DatabaseRouter', ]
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

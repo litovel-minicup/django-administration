@@ -3,7 +3,7 @@ from random import shuffle
 
 from django.core.management.base import BaseCommand
 
-from minicup_administration.core.models import Match
+from minicup_model.core.models import Match
 
 
 class Command(BaseCommand):

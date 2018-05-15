@@ -24,8 +24,9 @@ def setup():
         author='Josef Kolář',
         author_email='thejoeejoee@gmail.com',
         packages=find_packages(),
-        requires=[
+        install_requires=[
             'Django',
+            'mysqlclient',
         ],
     )
 

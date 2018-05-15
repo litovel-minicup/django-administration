@@ -6,7 +6,7 @@ from typing import Tuple, Optional
 from django.db import models
 from django.utils.translation import ugettext as _
 
-from minicup_administration.core.models.managers import MatchManager
+from minicup_model.core.models.managers import MatchManager
 
 
 class Category(models.Model):

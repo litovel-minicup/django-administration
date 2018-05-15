@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.db.models import F
 
-from minicup_administration.core.models import MatchTerm
+from minicup_model.core.models import MatchTerm
 
 
 class Command(BaseCommand):

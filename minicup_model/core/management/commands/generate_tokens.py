@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from django.core.management.base import BaseCommand
 
-from minicup_administration.core.models import TeamInfo
+from minicup_model.core.models import TeamInfo
 
 
 class Command(BaseCommand):

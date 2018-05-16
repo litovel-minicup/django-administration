@@ -46,6 +46,8 @@ class DbMigrations(models.Model):
 
 
 class Match(models.Model):
+    objects = MatchManager()
+
     STATE_INIT = 'init'
     STATE_HALF_FIRST = 'half_first'
     STATE_HALF_PAUSE = 'pause'
@@ -62,7 +64,7 @@ class Match(models.Model):
 
     DEFAULT_STATES = (STATE_INIT, STATE_END)  # by by bool(match.confirmed)
 
-    HALF_LENGTH = timedelta(minutes=2)
+    HALF_LENGTH = timedelta(minutes=10)
 
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True)
     category = models.ForeignKey(Category, models.PROTECT, related_name='match_category')
@@ -127,14 +129,14 @@ class Match(models.Model):
         self.refresh_from_db()
 
         if new_state not in self.STATES:
-            logging.error('Unknown state {} to set.'.format(new_state))
+            logging.error('MATCH {}: Unknown state {} to set.'.format(self.id, new_state))
             return
 
         if new_state not in self.STATES.get(self.online_state, self.DEFAULT_STATES[bool(self.confirmed)]):
             # logging.error('Cannot go from {} to {}.'.format(self.online_state, new_state))
             return
 
-        logging.info('MATCH: Match state change from {} to {}.'.format(self.online_state, new_state))
+        logging.info('MATCH {}: Match state change from {} to {}.'.format(self.id, self.online_state, new_state))
         old_state = self.online_state
         self.online_state = new_state
         self.save(update_fields=('online_state',))
@@ -160,6 +162,16 @@ class Match(models.Model):
         else:
             raise RuntimeError('Never happen: {} -> {}.'.format(old_state, new_state))
         event.save()
+        return event
+
+    def on_timer_end(self) -> Optional['MatchEvent']:
+        self.refresh_from_db()
+        event = None
+        if self.online_state == Match.STATE_HALF_FIRST:
+            event = self.change_state(Match.STATE_HALF_PAUSE)
+        elif self.online_state == Match.STATE_HALF_SECOND:
+            event = self.change_state(Match.STATE_END)
+
         return event
 
 
@@ -316,8 +328,6 @@ class Tag(models.Model):
 
 
 class Team(models.Model):
-    objects = MatchManager()
-
     category = models.ForeignKey(Category, models.PROTECT)
     team_info = models.ForeignKey('TeamInfo', models.PROTECT)
     order = models.IntegerField()

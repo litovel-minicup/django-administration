@@ -21,10 +21,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '(tzfpo+h3^x9*v$3mgcgu7@9rc&$qqsbxpc%-mid1-&u+h*b3q'
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -74,17 +74,6 @@ WSGI_APPLICATION = 'minicup_model.minicup.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'minicup',
-        'USER': 'dev',
-        'PASSWORD': 'dev',
-        'HOST': 'localhost',  # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
-    }
-}
-
 DATABASE_ROUTERS = ['minicup_model.core.db_router.DatabaseRouter', ]
 
 # Password validation
@@ -123,4 +112,8 @@ USE_TZ = False  # TODO: sorry, but legacy db using UTC ://
 
 STATIC_URL = '/static/'
 
+# custom
+
 SENTRY_DSN = ''
+
+WS_ALLOWED_ORIGINS = ('live.minicup.tatranlitovel.cz', 'minicup.tatranlitovel.cz')

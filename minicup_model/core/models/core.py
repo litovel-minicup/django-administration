@@ -66,7 +66,7 @@ class Match(models.Model):
 
     HALF_LENGTH = timedelta(minutes=10)
 
-    match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True)
+    match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True, related_name='match_match_term')
     category = models.ForeignKey(Category, models.PROTECT, related_name='match_category')
     home_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_home_team_info')
     away_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_away_team_info')

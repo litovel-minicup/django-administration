@@ -1,6 +1,6 @@
 # coding=utf-8
 import logging
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Tuple, Optional
 
 from django.db import models
@@ -118,6 +118,7 @@ class Match(models.Model):
             half_length=self.HALF_LENGTH.total_seconds(),
             state=self.online_state or (self.STATE_END if self.confirmed else self.STATE_INIT),
             facebook_video_id=self.facebook_video_id,
+            match_term_start=self.match_term.timestamp,
             **kwargs
         )
 
@@ -240,6 +241,10 @@ class MatchTerm(models.Model):
 
     def __str__(self):
         return _('{} | {}').format(self.start.time(), self.day)
+
+    @property
+    def timestamp(self):
+        return datetime.combine(self.day.day, self.start.time()).timestamp()
 
     class Meta:
         managed = False

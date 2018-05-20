@@ -1,5 +1,5 @@
 # coding=utf-8
-
+from typing import Union, Iterable
 
 from django.db import models
 from django.db.models import Q

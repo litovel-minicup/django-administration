@@ -27,6 +27,7 @@ def setup():
         install_requires=[
             'Django',
             'mysqlclient',
+            'django-extensions',
         ],
     )
 

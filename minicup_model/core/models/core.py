@@ -380,6 +380,7 @@ class User(models.Model):
     username = models.TextField()
     password_hash = models.TextField()
     fullname = models.TextField()
+    pin = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

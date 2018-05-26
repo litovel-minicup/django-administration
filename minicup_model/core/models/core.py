@@ -129,6 +129,7 @@ class Match(models.Model):
             category_name=self.category.name,
             category_slug=self.category.slug,
             year_slug=self.category.year.slug,
+
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],

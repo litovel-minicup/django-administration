@@ -7,7 +7,7 @@ from uuid import uuid4
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
-from minicup_model.core.models import TeamInfo, Category, MatchTerm, Day
+from minicup_model.core.models import TeamInfo, Category, MatchTerm, Day, Match
 
 
 class Command(BaseCommand):
@@ -25,12 +25,14 @@ class Command(BaseCommand):
             slug=category_slug,
             year__slug=year_slug
         )
+        category.match_category.all().delete()
 
         for line in to_import.readlines():
             line = line.strip().split('\t')
             if not line:
                 continue
-
+            # separator is \t
+            # 12.6.2018 13:30 Tatran Dukla A
             day, time, home, away, location = line
 
             home, _ = TeamInfo.objects.get_or_create(
@@ -61,6 +63,13 @@ class Command(BaseCommand):
             )
             # TODO: insert match
             print(term, home, away)
+            Match(
+                match_term=term,
+                home_team_info=home,
+                away_team_info=away,
+                category=category,
+
+            ).save()
 
 
 

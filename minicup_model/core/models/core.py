@@ -4,6 +4,8 @@ from datetime import timedelta, datetime
 from typing import Tuple, Optional
 
 from django.db import models
+from django.db.models import Func, CharField, F, Value, DateTimeField
+from django.db.models.functions import Cast, TruncDate, TruncTime
 from django.utils.translation import ugettext as _
 
 from minicup_model.core.models.managers import MatchManager
@@ -46,6 +48,16 @@ class DbMigrations(models.Model):
 
 
 class Match(models.Model):
+    MATCH_START_ANNOTATION = Cast(
+        Func(
+            TruncDate(F('match_term__day__day')),
+            Value('  ', output_field=CharField()),
+            TruncTime(F('match_term__start')),
+            output_field=CharField(),
+            function='CONCAT',
+        ), output_field=DateTimeField()
+    )
+
     objects = MatchManager()
 
     STATE_INIT = 'init'
@@ -62,9 +74,11 @@ class Match(models.Model):
         STATE_END: ()
     }
 
+    MATCH_PLAYING_STATE = (STATE_HALF_FIRST, STATE_HALF_PAUSE, STATE_HALF_SECOND)
+
     DEFAULT_STATES = (STATE_INIT, STATE_END)  # by by bool(match.confirmed)
 
-    HALF_LENGTH = timedelta(minutes=10)
+    HALF_LENGTH = timedelta(minutes=1)
 
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True, related_name='match_match_term')
     category = models.ForeignKey(Category, models.PROTECT, related_name='match_category')
@@ -87,26 +101,27 @@ class Match(models.Model):
         managed = False
         db_table = 'match'
         unique_together = (('category', 'home_team_info', 'away_team_info'),)
-        ordering = ('match_term__day__day', 'match_term__start', 'id')
+        ordering = ('match_term__day__day', 'match_term__start', 'match_term__location', 'id')
 
     def serialize(self, **kwargs):
-        def format_color(team: TeamInfo):
+        def format_color(team: "TeamInfo"):
             if team.dress_color_secondary:
                 return '{t.dress_color} / {t.dress_color_secondary}'.format(t=team)
             return team.dress_color
 
         return dict(
             id=self.id,
-
             home_team_id=self.home_team_info.id,
             home_team_name=self.home_team_info.name,
-            home_team_abbr=self.home_team_info.abbr,
+            home_team_abbr=self.home_team_info.abbr or self.home_team_info.name[:4].upper(),
+            home_team_slug=self.home_team_info.slug,
             home_team_color='#ff8574',
             home_team_color_name=format_color(self.home_team_info),
 
             away_team_id=self.away_team_info.id,
             away_team_name=self.away_team_info.name,
-            away_team_abbr=self.away_team_info.abbr,
+            away_team_abbr=self.away_team_info.abbr or self.away_team_info.name[:4].upper(),
+            away_team_slug=self.away_team_info.slug,
             away_team_color='#88dd12',
             away_team_color_name=format_color(self.away_team_info),
 
@@ -201,6 +216,12 @@ class MatchEvent(models.Model):
         db_table = 'match_event'
         ordering = ['half_index', 'time_offset']
 
+    @property
+    def absolute_time(self):
+        return ((self.match.first_half_start, self.match.second_half_start)[
+                              self.half_index
+                          ] + timedelta(seconds=self.time_offset))
+
     def serialize(self):
         try:
             team_index = self.match.teams.index(self.team_info)
@@ -215,8 +236,10 @@ class MatchEvent(models.Model):
             score=self.score,
             type=self.type,
             team_index=team_index,
-            player_name='{p.name} {p.surname}'.format(p=self.player) if self.player else None,
-            player_number=self.player.number if self.player else None
+            player_name=str(self.player) if self.player else None,
+            player_number=self.player.number if self.player else None,
+
+            absolute_time=self.absolute_time.timestamp()
         )
 
     @property
@@ -240,7 +263,11 @@ class MatchTerm(models.Model):
     location = models.CharField(max_length=50)
 
     def __str__(self):
-        return _('{} | {}').format(self.start.time(), self.day)
+        return _('{}{} | {}').format(
+            '{} |'.format(self.location) if self.location else '',
+            self.start.time(),
+            self.day
+        )
 
     @property
     def timestamp(self):
@@ -303,6 +330,15 @@ class Player(models.Model):
 
     def __str__(self):
         return '{0.name} {0.surname}'.format(self)
+
+    def serialize(self):
+        return dict(
+            id=self.id,
+            name=str(self),
+            surname=self.surname,
+            lastname=self.name,
+            number=self.number
+        )
 
 
 class StaticContent(models.Model):

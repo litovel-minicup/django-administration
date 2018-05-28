@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import Func, CharField, F, Value, DateTimeField
 from django.db.models.functions import Cast, TruncDate, TruncTime
 from django.utils.translation import ugettext as _
+from django_extensions.db.fields import CreationDateTimeField
 
 from minicup_model.core.models.managers import MatchManager
 
@@ -126,6 +127,8 @@ class Match(models.Model):
             away_team_color_name=format_color(self.away_team_info),
 
             category_name=self.category.name,
+            category_slug=self.category.slug,
+            year_slug=self.category.year.slug,
             first_half_start=self.first_half_start.timestamp() if self.first_half_start else None,
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],
@@ -369,14 +372,14 @@ class Tag(models.Model):
 
 
 class Team(models.Model):
-    category = models.ForeignKey(Category, models.PROTECT)
+    category = models.ForeignKey(Category, models.PROTECT, related_name='category_team')
     team_info = models.ForeignKey('TeamInfo', models.PROTECT)
-    order = models.IntegerField()
-    points = models.IntegerField()
-    scored = models.IntegerField()
-    received = models.IntegerField()
-    inserted = models.DateTimeField()
-    actual = models.IntegerField()
+    order = models.IntegerField(default=0)
+    points = models.IntegerField(default=0)
+    scored = models.IntegerField(default=0)
+    received = models.IntegerField(default=0)
+    inserted = CreationDateTimeField()
+    actual = models.IntegerField(default=0)
     after_match = models.ForeignKey(Match, models.PROTECT, blank=True, null=True)
 
     def __str__(self):

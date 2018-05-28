@@ -7,7 +7,7 @@ from uuid import uuid4
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
-from minicup_model.core.models import TeamInfo, Category, MatchTerm, Day, Match
+from minicup_model.core.models import TeamInfo, Category, MatchTerm, Day, Match, Team
 
 
 class Command(BaseCommand):
@@ -26,6 +26,7 @@ class Command(BaseCommand):
             year__slug=year_slug
         )
         category.match_category.all().delete()
+        # category.category_team.all().delete()
 
         for line in to_import.readlines():
             line = line.strip().split('\t')
@@ -42,12 +43,22 @@ class Command(BaseCommand):
                     slug=slugify(home)
                 )
             )
+            Team.objects.get_or_create(
+                team_info=home,
+                category=home.category,
+                actual=1
+            )
             away, _ = TeamInfo.objects.get_or_create(
                 name=away,
                 category=category,
                 defaults=dict(
                     slug=slugify(away)
                 )
+            )
+            Team.objects.get_or_create(
+                team_info=away,
+                category=away.category,
+                actual=1
             )
             day = datetime.strptime(day.strip(), "%d.%m.%Y").date()
             time = datetime.strptime(time.strip(), "%H:%M")
@@ -61,7 +72,6 @@ class Command(BaseCommand):
                 end=(time + MatchTerm.STANDARD_LENGTH),
                 location=location,
             )
-            # TODO: insert match
             print(term, home, away)
             Match(
                 match_term=term,

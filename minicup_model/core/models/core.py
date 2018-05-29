@@ -267,7 +267,7 @@ class MatchTerm(models.Model):
 
     def __str__(self):
         return _('{}{} | {}').format(
-            '{} |'.format(self.location) if self.location else '',
+            '{} | '.format(self.location) if self.location else '',
             self.start.time(),
             self.day
         )
@@ -307,6 +307,13 @@ class Photo(models.Model):
     class Meta:
         managed = False
         db_table = 'photo'
+
+    def __str__(self):
+        return self.filename
+
+    @property
+    def tag_count(self):
+        return self.photo_tag_photo.count()
 
 
 class PhotoTag(models.Model):
@@ -368,7 +375,11 @@ class Tag(models.Model):
         unique_together = (('name', 'year'), ('slug', 'year'),)
 
     def __str__(self):
-        return _('Tag {}:{}').format(self.year, self.name)
+        return _('{}').format(self.name)
+
+    @property
+    def photo_count(self):
+        return self.photo_tag_tag.count()
 
 
 class Team(models.Model):
@@ -418,6 +429,14 @@ class TeamInfo(models.Model):
         managed = False
         db_table = 'team_info'
         unique_together = (('category', 'slug'), ('category', 'name'),)
+
+    @property
+    def player_count(self):
+        return self.team_info_player.count()
+
+    @property
+    def photo_count(self):
+        return self.tag.photo_count if self.tag else 0
 
 
 class User(models.Model):

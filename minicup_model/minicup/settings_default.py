@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 
 # noinspection PyUnresolvedReferences
+from os.path import join
+
 from django.conf.global_settings import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -57,7 +59,9 @@ ROOT_URLCONF = 'minicup_model.minicup.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            join(BASE_DIR, 'templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,3 +122,10 @@ STATIC_URL = '/admin/static/'
 SENTRY_DSN = ''
 
 WS_ALLOWED_ORIGINS = ('live.minicup.tatranlitovel.cz', 'minicup.tatranlitovel.cz')
+
+# FORCE_SCRIPT_NAME = '/admin'
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]

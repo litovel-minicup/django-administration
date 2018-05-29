@@ -1,11 +1,13 @@
 # coding=utf-8
-from django.contrib import admin
-from django.contrib import messages
+from django.contrib import admin, messages
 from django.db.models import QuerySet
+from django.forms import TextInput, Textarea
 from django.forms.models import ModelForm
+from django.utils.html import format_html
 from django.utils.translation import ugettext as _
 
-from .models import TeamInfo, MatchTerm, Match
+from minicup_model.core.models import Photo
+from .models import TeamInfo, MatchTerm, Match, Tag
 
 
 def swap(model_admin: admin.ModelAdmin, request, queryset: QuerySet):
@@ -69,10 +71,77 @@ class TeamInfoAdmin(admin.ModelAdmin):
     )
     list_display = (
         '__str__',
+        'slug',
         'tag',
+        'player_count',
+        'photo_count',
     )
+
+    class form(ModelForm):
+        class Meta:
+            model = Photo
+            fields = '__all__'
+            widgets = dict(
+                password=Textarea(attrs=dict(rows=1)),
+                # active=CheckboxInput,
+            )
 
 
 @admin.register(MatchTerm)
 class MatchTermAdmin(admin.ModelAdmin):
     date_hierarchy = 'day__day'
+
+    list_filter = (
+        # 'day__year'
+    )
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    # date_hierarchy = 'year'
+
+    list_display = (
+        '__str__',
+        'photo_count',
+        'is_main',
+    )
+
+    list_filter = (
+        'year',
+        'is_main',
+    )
+
+
+@admin.register(Photo)
+class PhotoAdmin(admin.ModelAdmin):
+    # date_hierarchy = 'year'
+    class form(ModelForm):
+        class Meta:
+            model = Photo
+            fields = '__all__'
+            widgets = dict(
+                filename=TextInput,
+                author=TextInput,
+                # active=CheckboxInput,
+            )
+
+    list_display = (
+        '__str__',
+        'added',
+        'taken',
+        'tag_count',
+        'image'
+    )
+
+    readonly_fields = ('filename',)
+
+    list_filter = (
+        'photo_tag_photo__tag__year',
+    )
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @staticmethod
+    def image(obj: Photo):
+        return format_html('<img height="50" src="https://minicup.tatranlitovel.cz/media/thumb/{}"/>', obj.filename)

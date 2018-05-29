@@ -20,6 +20,7 @@ def setup():
     core.setup(
         name='litovel-minicup-model',
         version='1.0.0',
+        url='https://github.com/litovel-minicup/model',
         description='Core package with Litovel MINICUP models in Django.',
         author='Josef Kolář',
         author_email='thejoeejoee@gmail.com',
@@ -29,6 +30,11 @@ def setup():
             'mysqlclient',
             'django-extensions',
         ],
+        entry_points=dict(
+            console_scripts=[
+                'litovel-minicup-model-manage=minicup_model.manage:manage',
+            ]
+        )
     )
 
 

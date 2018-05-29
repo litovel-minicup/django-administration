@@ -89,7 +89,7 @@ class Match(models.Model):
     score_away = models.IntegerField(blank=True, null=True)
     confirmed = models.DateTimeField(blank=True, null=True)
     confirmed_as = models.IntegerField(blank=True, null=True)
-    online_state = models.CharField(max_length=255, choices=STATES.items())
+    online_state = models.CharField(max_length=255, choices=STATES.items(), default=STATE_INIT)
 
     first_half_start = models.DateTimeField(blank=True, null=True)
     second_half_start = models.DateTimeField(blank=True, null=True)

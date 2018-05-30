@@ -243,7 +243,8 @@ class MatchEvent(models.Model):
             player_name=str(self.player) if self.player else None,
             player_number=self.player.number if self.player else None,
 
-            absolute_time=self.absolute_time.timestamp()
+            absolute_time=self.absolute_time.timestamp(),
+            match_id=self.match.id,
         )
 
     @property

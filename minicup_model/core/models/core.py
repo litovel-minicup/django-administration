@@ -329,8 +329,8 @@ class PhotoTag(models.Model):
 
 
 class Player(models.Model):
-    name = models.CharField(max_length=50)
-    surname = models.CharField(max_length=50)
+    name = models.CharField(max_length=50) # first name
+    surname = models.CharField(max_length=50) # last name
     number = models.IntegerField()
     secondary_number = models.IntegerField(blank=True, null=True)
     team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='team_info_player')
@@ -347,8 +347,8 @@ class Player(models.Model):
         return dict(
             id=self.id,
             name=str(self),
-            surname=self.surname,
-            lastname=self.name,
+            lastname=self.surname,
+            firstname=self.name,
             number=self.number
         )
 

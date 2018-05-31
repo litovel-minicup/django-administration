@@ -79,7 +79,7 @@ class Match(models.Model):
 
     DEFAULT_STATES = (STATE_INIT, STATE_END)  # by by bool(match.confirmed)
 
-    HALF_LENGTH = timedelta(minutes=1)
+    HALF_LENGTH = timedelta(minutes=10)
 
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True, related_name='match_match_term')
     category = models.ForeignKey(Category, models.PROTECT, related_name='match_category')
@@ -245,6 +245,7 @@ class MatchEvent(models.Model):
 
             absolute_time=self.absolute_time.timestamp(),
             match_id=self.match.id,
+            team_id=self.team_info.id if self.team_info else None
         )
 
     @property

@@ -12,9 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 
 # noinspection PyUnresolvedReferences
+from datetime import datetime
 from os.path import join
-
-from django.conf.global_settings import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -131,3 +130,5 @@ STATICFILES_FINDERS = [
 ]
 
 FACEBOOK_PAGE_ACCESS_TOKEN = ''
+
+SERVER_STARTED = datetime.now()

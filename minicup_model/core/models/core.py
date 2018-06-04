@@ -204,7 +204,7 @@ class MatchEvent(models.Model):
     type = models.CharField(max_length=16, blank=True, null=True)
     half_index = models.IntegerField()
     time_offset = models.IntegerField()
-    player = models.ForeignKey('Player', models.PROTECT, blank=True, null=True)
+    player = models.ForeignKey('Player', models.PROTECT, blank=True, null=True, related_name='match_event_player')
     team_info = models.ForeignKey('TeamInfo', models.PROTECT, blank=True, null=True)
 
     TYPE_START = 'start'
@@ -223,8 +223,8 @@ class MatchEvent(models.Model):
     @property
     def absolute_time(self):
         return ((self.match.first_half_start, self.match.second_half_start)[
-                              self.half_index
-                          ] + timedelta(seconds=self.time_offset))
+                    self.half_index
+                ] + timedelta(seconds=self.time_offset))
 
     def serialize(self):
         try:
@@ -330,8 +330,8 @@ class PhotoTag(models.Model):
 
 
 class Player(models.Model):
-    name = models.CharField(max_length=50) # first name
-    surname = models.CharField(max_length=50) # last name
+    name = models.CharField(max_length=50)  # first name
+    surname = models.CharField(max_length=50)  # last name
     number = models.IntegerField()
     secondary_number = models.IntegerField(blank=True, null=True)
     team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='team_info_player')
@@ -344,13 +344,14 @@ class Player(models.Model):
     def __str__(self):
         return '{0.name} {0.surname}'.format(self)
 
-    def serialize(self):
+    def serialize(self, **kwargs):
         return dict(
             id=self.id,
             name=str(self),
             lastname=self.surname,
             firstname=self.name,
-            number=self.number
+            number=self.number,
+            **kwargs
         )
 
 
@@ -387,7 +388,7 @@ class Tag(models.Model):
 
 class Team(models.Model):
     category = models.ForeignKey(Category, models.PROTECT, related_name='category_team')
-    team_info = models.ForeignKey('TeamInfo', models.PROTECT)
+    team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='team_team_info')
     order = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
     scored = models.IntegerField(default=0)
@@ -433,12 +434,25 @@ class TeamInfo(models.Model):
         db_table = 'team_info'
         unique_together = (('category', 'slug'), ('category', 'name'),)
 
+    def serialize(self, **kwargs):
+        return dict(
+            id=self.id,
+            name=self.name,
+            trainer_name=self.trainer_name,
+            dress_color=self.dress_color,
+            **kwargs,
+        )
+
     @property
-    def player_count(self):
+    def team(self) -> Team:
+        return self.team_team_info.filter(actual=1).first()
+
+    @property
+    def player_count(self) -> int:
         return self.team_info_player.count()
 
     @property
-    def photo_count(self):
+    def photo_count(self) -> int:
         return self.tag.photo_count if self.tag else 0
 
 

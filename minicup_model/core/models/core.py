@@ -240,6 +240,7 @@ class MatchEvent(models.Model):
             score=self.score,
             type=self.type,
             team_index=team_index,
+            player_id=self.player.id if self.player else None,
             player_name=str(self.player) if self.player else None,
             player_number=self.player.number if self.player else None,
 

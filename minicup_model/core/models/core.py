@@ -81,6 +81,8 @@ class Match(models.Model):
 
     HALF_LENGTH = timedelta(minutes=10)
 
+    half_length = None  # type: Optional[timedelta]
+
     match_term = models.ForeignKey('MatchTerm', models.PROTECT, blank=True, null=True, related_name='match_match_term')
     category = models.ForeignKey(Category, models.PROTECT, related_name='match_category')
     home_team_info = models.ForeignKey('TeamInfo', models.PROTECT, related_name='match_home_team_info')
@@ -134,7 +136,7 @@ class Match(models.Model):
             second_half_start=self.second_half_start.timestamp() if self.second_half_start else None,
             score=[self.score_home, self.score_away],
             confirmed=self.confirmed.timestamp() if self.confirmed else None,
-            half_length=self.HALF_LENGTH.total_seconds(),
+            half_length=self.HALF_LENGTH.total_seconds() if not self.half_length else self.half_length.total_seconds(),
             state=self.online_state or (self.STATE_END if self.confirmed else self.STATE_INIT),
             facebook_video_id=self.facebook_video_id,
             match_term_start=self.match_term.timestamp,

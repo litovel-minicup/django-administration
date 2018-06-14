@@ -202,6 +202,7 @@ class MatchEvent(models.Model):
     match = models.ForeignKey(Match, models.PROTECT, related_name='match_match_event')
     score_home = models.IntegerField(blank=True, null=True)
     score_away = models.IntegerField(blank=True, null=True)
+
     message = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=16, blank=True, null=True)
     half_index = models.IntegerField()

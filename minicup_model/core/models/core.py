@@ -67,6 +67,14 @@ class Match(models.Model):
     STATE_HALF_SECOND = 'half_second'
     STATE_END = 'end'
 
+    STATES_CHOICES = (
+        2 * (STATE_INIT,),
+        2 * (STATE_HALF_FIRST,),
+        2 * (STATE_HALF_PAUSE,),
+        2 * (STATE_HALF_SECOND,),
+        2 * (STATE_END,),
+    )
+
     STATES = {
         STATE_INIT: (STATE_HALF_FIRST,),
         STATE_HALF_FIRST: (STATE_HALF_PAUSE,),
@@ -91,7 +99,7 @@ class Match(models.Model):
     score_away = models.IntegerField(blank=True, null=True)
     confirmed = models.DateTimeField(blank=True, null=True)
     confirmed_as = models.IntegerField(blank=True, null=True)
-    online_state = models.CharField(max_length=255, choices=STATES.items(), default=STATE_INIT)
+    online_state = models.CharField(max_length=255, choices=STATES_CHOICES, default=STATE_INIT)
 
     first_half_start = models.DateTimeField(blank=True, null=True)
     second_half_start = models.DateTimeField(blank=True, null=True)
@@ -118,14 +126,16 @@ class Match(models.Model):
             home_team_name=self.home_team_info.name,
             home_team_abbr=self.home_team_info.abbr or self.home_team_info.name[:4].upper(),
             home_team_slug=self.home_team_info.slug,
-            home_team_color='#ff8574',
+            home_team_color_primary=self.home_team_info.color_primary,
+            home_team_color_secondary=self.home_team_info.color_secondary,
             home_team_color_name=format_color(self.home_team_info),
 
             away_team_id=self.away_team_info.id,
             away_team_name=self.away_team_info.name,
             away_team_abbr=self.away_team_info.abbr or self.away_team_info.name[:4].upper(),
             away_team_slug=self.away_team_info.slug,
-            away_team_color='#88dd12',
+            away_team_color_primary=self.away_team_info.color_primary,
+            away_team_color_secondary=self.away_team_info.color_secondary,
             away_team_color_name=format_color(self.away_team_info),
 
             category_name=self.category.name,
@@ -324,7 +334,7 @@ class Photo(models.Model):
 
 
 class PhotoTag(models.Model):
-    photo = models.ForeignKey(Photo, models.PROTECT, primary_key=True, related_name='photo_tag_photo')
+    photo = models.ForeignKey(Photo, models.PROTECT, related_name='photo_tag_photo')
     tag = models.ForeignKey('Tag', models.PROTECT, related_name='photo_tag_tag')
 
     class Meta:
@@ -410,7 +420,7 @@ class Team(models.Model):
 
 
 class TeamInfo(models.Model):
-    category = models.ForeignKey(Category, models.PROTECT)
+    category = models.ForeignKey(Category, models.PROTECT, related_name='team_info_category')
     name = models.CharField(max_length=30)
     slug = models.CharField(max_length=30)
     abbr = models.CharField(max_length=4, null=True, blank=True)
@@ -429,6 +439,9 @@ class TeamInfo(models.Model):
     dress_color_max = models.CharField(max_length=7)
     dress_color_secondary_min = models.CharField(max_length=7)
     dress_color_secondary_max = models.CharField(max_length=7)
+
+    color_primary = models.CharField(max_length=7)
+    color_secondary = models.CharField(max_length=7)
 
     def __str__(self):
         return self.name

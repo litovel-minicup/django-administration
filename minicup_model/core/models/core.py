@@ -87,7 +87,7 @@ class Match(models.Model):
 
     DEFAULT_STATES = (STATE_INIT, STATE_END)  # by by bool(match.confirmed)
 
-    HALF_LENGTH = timedelta(minutes=10)
+    HALF_LENGTH = timedelta(minutes=1)
 
     half_length = None  # type: Optional[timedelta]
 
@@ -138,6 +138,7 @@ class Match(models.Model):
             away_team_color_secondary=self.away_team_info.color_secondary,
             away_team_color_name=format_color(self.away_team_info),
 
+            category_id=self.category.id,
             category_name=self.category.name,
             category_slug=self.category.slug,
             year_slug=self.category.year.slug,

@@ -128,6 +128,7 @@ class Match(models.Model):
             home_team_slug=self.home_team_info.slug,
             home_team_color_primary=self.home_team_info.color_primary,
             home_team_color_secondary=self.home_team_info.color_secondary,
+            home_team_color_text=self.home_team_info.color_text,
             home_team_color_name=format_color(self.home_team_info),
 
             away_team_id=self.away_team_info.id,
@@ -136,6 +137,7 @@ class Match(models.Model):
             away_team_slug=self.away_team_info.slug,
             away_team_color_primary=self.away_team_info.color_primary,
             away_team_color_secondary=self.away_team_info.color_secondary,
+            away_team_color_text=self.away_team_info.color_text,
             away_team_color_name=format_color(self.away_team_info),
 
             category_id=self.category.id,
@@ -443,6 +445,7 @@ class TeamInfo(models.Model):
 
     color_primary = models.CharField(max_length=7)
     color_secondary = models.CharField(max_length=7)
+    color_text = models.CharField(max_length=7)
 
     def __str__(self):
         return self.name

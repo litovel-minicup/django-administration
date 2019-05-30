@@ -87,7 +87,7 @@ class Match(models.Model):
 
     DEFAULT_STATES = (STATE_INIT, STATE_END)  # by by bool(match.confirmed)
 
-    HALF_LENGTH = timedelta(minutes=3)
+    HALF_LENGTH = timedelta(minutes=10)
 
     half_length = None  # type: Optional[timedelta]
 
